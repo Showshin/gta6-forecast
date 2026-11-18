@@ -1,14 +1,17 @@
-// GTA VI launch-day Twitch forecast: a weighted regression on the launch shape of
-// comparable games. Each comparable contributes log(viewers_h / viewers_1) for every
-// hour of its own UTC release day, weighted toward games that left the gate the way
-// GTA VI will over the comparable's hour 1. The weighted mean and spread of those ratios,
-// lightly smoothed over neighbouring hours, place the five quantiles of every hour.
+// GTA VI launch-day Twitch forecast: a weighted launch-shape regression over the
+// comparable games. Each comparable contributes r_h = log(viewers_h / viewers_1) for
+// every hour h of its own UTC release day, weighted toward games that left the gate the
+// way GTA VI will (midnight rolling unlock, console-only release) and toward games whose
+// hour-1 crowd resembles the case's. Per hour, the weighted mean and spread of r_h,
+// lightly smoothed over neighbouring hours, place the five quantiles around hour 1's
+// print: q = p1 * exp(center + z * spread).
 
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const INPUT_DIR = process.env.MAKEFUN_INPUT_DIR ?? '/input';
 const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+// Standard normal quantiles at levels [0.05, 0.25, 0.50, 0.75, 0.95], the output order.
 const Z = [-1.6448536269514722, -0.6744897501960817, 0, 0.6744897501960817, 1.6448536269514722];
 const FIRST_HOUR = 2;
 const LAST_HOUR = 24;
